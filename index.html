@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>万年カレンダー</title>
+        <style>
+			table,th,td,hr{border:solid 1.5px rgb(0, 187, 255);}
+            .sunday{color: red;}
+            span{text-decoration: underline;}
+            table,.date,.btnbn{width: 400px;margin-top: 5px;}
+            .date,.btnbn{line-height: 2rem;}
+            .click{font-weight: bold; font-size: 1.3rem;}
+			table{border-collapse:collapse;}
+            #wrapper{width:800px;margin:0 auto;}
+            .date{margin: 0 50 0;}
+            .btnbn{display:flex; justify-content:space-evenly}
+            .date{display: flex; justify-content: center;}
+		</style>
+    </head>
+    <body>
+        <div id="wrapper">
+            <h1>万年カレンダー</h1>
+            <hr>
+            <strong><span>1970年以降の西暦年を半角で入力</span>して、『click』ボタンを押してください</strong>
+            <section class="date">
+                <input type="text" pattern="[0-9]" id="year" size="4" placeholder="1970" maxlength="4">
+                    <label for="year">年</label>
+                    <select id="month">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                    </select>
+                    <label for="month">月</label>
+                    <input class="click" type="button" id="btn" value="click">
+            </section>
+            <section class="btnbn">
+                <input type="button" id="btnback" value="前の月">
+                <input type="button" id="btnnext" value="次の月">
+            </section>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="sunday">日</th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th>土</th>
+                    </tr>
+                    <tbody id="cale">
+                    </tbody>
+                </thead>
+            </table>
+        </div>
+        <script>
+            let month=[0,1,2,3,4,5,6,7,8,9,10,11];
+            //month...（0:1月〜11:12月）
+            let matsu=[31,28,31,30,31,30,31,31,30,31,30,31];
+            const baseyear=1970,basemonth=month[0];
+            let inputyear=1970;
+            let inputmonth=month[0];
+            const getyear=document.getElementById("year");
+            const getmonth=document.getElementById("month");
+            const btn=document.getElementById("btn");
+            const btnback=document.getElementById("btnback");
+            const btnnext=document.getElementById("btnnext");
+            let flag=false;
+            btn.onclick=function(){//『click』ボタンで発火する関数
+                inputyear=getyear.value;
+                inputmonth=getmonth.value;
+                console.log(inputyear,inputmonth);
+                if(flag){//前の表示を削除
+                    let rewrite=document.getElementById("cale");
+                    while (rewrite.firstChild) {
+                        rewrite.removeChild(rewrite.firstChild);
+                    }
+                }
+                writecalender();
+                flag=true;
+            }
+            btnback.onclick=function(){//『前の月』ボタンで発火する関数
+                inputyear=getyear.value;
+                inputmonth=getmonth.value;
+                if(inputmonth==1){
+                    inputyear--;
+                    inputmonth=12;
+                }
+                else{
+                    inputmonth--;
+                }
+                if(flag){//前の表示を削除
+                    let rewrite=document.getElementById("cale");
+                    while (rewrite.firstChild) {
+                        rewrite.removeChild(rewrite.firstChild);
+                    }
+                }
+                console.log(inputyear,inputmonth);
+                getyear.value=inputyear;
+                getmonth.value=inputmonth;
+                writecalender();
+                flag=true;
+            }
+            btnnext.onclick=function(){//『次の月』ボタンで発火する関数
+                inputyear=getyear.value;
+                inputmonth=getmonth.value;
+                if(inputmonth==12){
+                    inputyear++;
+                    inputmonth=1;
+                }
+                else{
+                    inputmonth++;
+                }
+                if(flag){//前の表示を削除
+                    let rewrite=document.getElementById("cale");
+                    while (rewrite.firstChild) {
+                        rewrite.removeChild(rewrite.firstChild);
+                    }
+                }
+                console.log(inputyear,inputmonth);
+                getyear.value=inputyear;
+                getmonth.value=inputmonth;
+                writecalender();
+                flag=true;
+            }
+            function writecalender(){//カレンダーを書き込む関数
+                inputmonth-=1;
+                let keikayears=inputyear-baseyear;
+                let uruucount=Math.floor((inputyear-1972+4)/4);//1972は最初のうるう年
+                if(inputyear>=2100){//うるう年っぽいけどうるう年にならない時のカウントを引く。nonuruuのベース2000年=0
+                    let nonuruu=0;
+                    for(i=2100;i<=inputyear;i+=100){
+                        nonuruu++;
+                        if(nonuruu%4==0){
+                            nonuruu--;
+                        }
+                    }
+                    console.log(nonuruu);
+                    uruucount=uruucount-nonuruu;
+                }
+                console.log(uruucount);
+                console.log(inputyear);
+                if((inputyear%400==0&&inputmonth<=1)||(inputyear%4==0&&inputyear%100!=0&&inputmonth<=1)){
+                    uruucount-=1;//うるう年の1月と2月の表示でははまだカウントしない
+                    if(((inputyear%400==0&&inputmonth<=1)||(inputyear%4==0&&inputyear%100!=0&&inputmonth<=1))&&(inputyear%100==0&&inputyear%400!=0)){
+                        uruucount+=1;//うるう年の1月と2月で西暦が100で割り切れて、400で割り切れない年はうるう年にならないからもとのuruucountに戻す
+                    }
+                }
+                let thisyeardays=0;
+                if(inputmonth>0){//thisyeardaysの合計
+                    for(let i=inputmonth-1;i>=0;i--){
+                        adddays=matsu[i];
+                        thisyeardays=adddays+thisyeardays;
+                    }
+                }
+                console.log(thisyeardays);
+                let keikadays=365*keikayears+uruucount+thisyeardays;
+                console.log(keikayears)
+                console.log(keikadays);
+                console.log(inputmonth);
+                let daystart=keikadays%7+4;
+                console.log(daystart);
+                if(daystart>6){
+                    daystart-=7;
+                }
+                let num=1;//カレンダーに書き込んでいく日にち
+                let calender=document.getElementById("cale");//<tbody id="cale">
+                let a_week="<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+                matsudate=matsu[inputmonth];
+                console.log(matsudate,inputmonth);
+                calender.insertAdjacentHTML("afterbegin",a_week);//第1週目を表記
+                let cell=0;//カレンダー内の１セル
+                        if(daystart!=0){//日曜始まりじゃない時
+                            num=num-daystart;
+                            for(let j=0;j<daystart;j++){
+                                let td=calender.getElementsByTagName("td")[cell];
+                                let changetd=td.innerHTML;
+                                td.innerHTML="&nbsp;";
+                                num++;
+                                cell++;
+                            }
+                        }
+                        for(let i=0;i<7-daystart;i++){
+                            let td=calender.getElementsByTagName("td")[cell];
+                            let changetd=td.innerHTML;
+                            td.innerHTML=num;
+                            num++;
+                            cell++;
+                        }
+                    while(1){
+                        calender.insertAdjacentHTML("beforeend",a_week);//第2週目以降を表記
+                            if((((inputyear%400==0||(inputyear%4==0&&inputyear%100!=0))&&inputmonth==1))&&!(inputyear%100==0&&inputyear%400!=0)){//うるう年の2月でかつ、うるう年っぽいけど違うのじゃない
+                                for(let i=0;i<7;i++){
+                                    if(num<=matsudate+1){
+                                        let td=calender.getElementsByTagName("td")[cell];
+                                        let changetd=td.innerHTML;
+                                        td.innerHTML=num;
+                                    }
+                                    else{
+                                        let td=calender.getElementsByTagName("td")[cell];
+                                        let changetd=td.innerHTML;
+                                        td.innerHTML="&nbsp;";
+                                    }    
+                                num++;
+                                cell++;
+                                }
+                            }
+                            else{
+                                for(let i=0;i<7;i++){
+                                    if(num<=matsudate){
+                                        let td=calender.getElementsByTagName("td")[cell];
+                                        let changetd=td.innerHTML;
+                                        td.innerHTML=num;
+                                    }
+                                    else{
+                                        let td=calender.getElementsByTagName("td")[cell];
+                                        let changetd=td.innerHTML;
+                                        td.innerHTML="&nbsp;";
+                                    }    
+                                num++;
+                                cell++;
+                                }
+                            }
+                        if(num>matsudate){
+                            break;
+                        } 
+                    }
+            }
+        </script>
+    </body>
+</html>
