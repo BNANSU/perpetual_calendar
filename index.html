@@ -2,14 +2,59 @@
 <html lang="ja">
     <head>
         <meta charset="UTF-8">
-        <title>万年カレンダー</title>
+        <title>perpetual calendar</title>
         <style>
 			table,th,td,hr{border:solid 1.5px rgb(0, 187, 255);}
             .sunday{color: red;}
-            span{text-decoration: underline;}
-            table,.date,.btnbn{width: 400px;margin-top: 5px;}
+            /* span{font-weight: bold; font-size: 1.3rem;} */
+            table{width: 400px;margin:10px auto;} /* ,.date,.btnbn */
             .date,.btnbn{line-height: 2rem;}
-            .click{font-weight: bold; font-size: 1.3rem;}
+            .click_btn .click{
+                position: relative;
+                text-align: center;
+                /* 中央揃え 
+                display: block;
+                margin: 0 auto;*/
+                /* 幅の指定 */
+                width: 100%;
+                max-width: 200px;
+                box-sizing: border-box;
+                padding: 10px;
+                /* 色の指定 */
+                background: linear-gradient(135deg, #ffd900, #ff9300);
+                color: #fff;
+                font-weight: bold;
+                border-radius: 8px;
+                transition: 0.3s;
+                border: 2px solid #ff9300;
+                background: #fff;
+                color: #ff9300;
+                }
+            .click_btn .click{
+                background: #ff9300;
+                color: #fff;
+                }
+            .click_btn .click:active, .click_btn .click:focus {
+                top: 2px;}
+            .click_btn .click:disabled{
+                position: relative;
+                text-align: center;
+                /* 中央揃え 
+                display: block;
+                margin: 0 auto;*/
+                /* 幅の指定 */
+                width: 100%;
+                max-width: 200px;
+                box-sizing: border-box;
+                padding: 10px;
+                font-weight: bold;
+                border-radius: 8px;
+                background: linear-gradient(-45deg, #ccc, #999);
+                color: #888;
+                cursor: not-allowed;
+                }
+            .alertarea{color: red;}
+            .click_btn{margin-top: 10px;}
 			table{border-collapse:collapse;}
             #wrapper{width:800px;margin:0 auto;}
             .date{margin: 0 50 0;}
@@ -19,12 +64,19 @@
     </head>
     <body>
         <div id="wrapper">
-            <h1>万年カレンダー</h1>
+            <h1>カレンダー</h1>
+            <p>★1970年以降のカレンダーを表示します★<br>
+            検索したい年月を入力して<span class="click">『click』</span>ボタンを押してください。</p>
             <hr>
-            <strong><span>1970年以降の西暦年を半角で入力</span>して、『click』ボタンを押してください</strong>
-            <section class="date">
-                <input type="text" pattern="[0-9]" id="year" size="4" placeholder="1970" maxlength="4">
+            <!-- <strong><span>1970年以降の西暦年を半角で入力</span>して、『click』ボタンを押してください</strong> -->
+            <div class="inputyear">
+                <div class="alertareadiv">
+                    <input type="number" pattern="[0-9]" id="year" size="6" placeholder="1970" maxlength="4" min="1970" class="year">
                     <label for="year">年</label>
+                    <br><span class="alertarea"></span>
+                </div>
+            </div>
+            <div class="inputmonth">
                     <select id="month">
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -40,11 +92,14 @@
                         <option value="12">12</option>
                     </select>
                     <label for="month">月</label>
-                    <input class="click" type="button" id="btn" value="click">
-            </section>
+            </div>
+            <div class="click_btn">
+                <input class="click onoff" type="button" id="btn" value="『click』" disabled="disabled">
+            </div>
+                
             <section class="btnbn">
-                <input type="button" id="btnback" value="前の月">
-                <input type="button" id="btnnext" value="次の月">
+                <input class="onoff" type="button" id="btnback" value="前の月" disabled="disabled">
+                <input class="onoff" type="button" id="btnnext" value="次の月" disabled="disabled">
             </section>
             <table>
                 <thead>
@@ -56,6 +111,7 @@
                 </thead>
             </table>
         </div>
+
         <script>
             let month=[0,1,2,3,4,5,6,7,8,9,10,11];
             //month...（0:1月〜11:12月）
@@ -69,10 +125,50 @@
             const btnback=document.getElementById("btnback");
             const btnnext=document.getElementById("btnnext");
             let flag=false;
+
+            let click_btnList = document.getElementsByClassName('onoff');
+            let click_btn = click_btnList[0];
+            let click_back = click_btnList[1];
+            let click_next= click_btnList[2];
+            document.addEventListener('DOMContentLoaded', function() {
+                // -----------------------
+                // 年数入力チェック
+                // -----------------------
+                let targets = document.getElementsByClassName('year');
+                // for (let i=0 ; i<targets.length ; i++) {
+                // ▼文字が入力されたタイミングでチェックする
+                targets[0].oninput = function () {
+                    let alertelement = this.parentNode.getElementsByClassName('alertarea');
+                    if( this.value.trim().length < 3 || this.value.trim() < 1970) {
+                        // ▼空白を除いた入力文字数が4文字よりも少ない、もしくは1970年以前を入力していたら
+                        if( alertelement[0] ) { alertelement[0].innerHTML = "※1970年以降の年を入力してください。"; }
+                        this.style.border = "2px solid red";//年数入力枠を赤色に
+                        click_btn.disabled = true;
+                        click_back.disabled = true;
+                        click_next.disabled = true;
+                        }
+                    else {
+                        // ▼1970年以降を入力していたら
+                        if( alertelement[0] ) { alertelement[0].innerHTML = ""; }
+                        this.style.border = "1px solid black";
+                        click_btn.disabled = false;
+                        console.log(getmonth.value); 
+                    }
+                // }
+                }
+            });
+
             btn.onclick=function(){//『click』ボタンで発火する関数
                 inputyear=getyear.value;
                 inputmonth=getmonth.value;
                 console.log(inputyear,inputmonth);
+                click_next.disabled = false;
+                if(((inputyear==1970) && (inputmonth>1)) || (inputyear > 1970)){
+                    click_back.disabled = false;
+                }
+                else{
+                    click_back.disabled = true;
+                }
                 if(flag){//前の表示を削除
                     let rewrite=document.getElementById("cale");
                     while (rewrite.firstChild) {
@@ -85,6 +181,12 @@
             btnback.onclick=function(){//『前の月』ボタンで発火する関数
                 inputyear=getyear.value;
                 inputmonth=getmonth.value;
+                if(((inputyear==1970) && (inputmonth>2)) || (inputyear > 1970)){
+                    click_back.disabled = false;
+                }
+                else{
+                    click_back.disabled = true;
+                }
                 if(inputmonth==1){
                     inputyear--;
                     inputmonth=12;
@@ -107,6 +209,12 @@
             btnnext.onclick=function(){//『次の月』ボタンで発火する関数
                 inputyear=getyear.value;
                 inputmonth=getmonth.value;
+                if(((inputyear==1970) && (inputmonth>0)) || (inputyear > 1970)){
+                    click_back.disabled = false;
+                }
+                else{
+                    click_back.disabled = true;
+                }
                 if(inputmonth==12){
                     inputyear++;
                     inputmonth=1;
@@ -229,6 +337,37 @@
                         } 
                     }
             }
+                // let num=1;//カレンダーに書き込んでいく日にち
+                // let calender=document.getElementById("cale");//<tbody id="cale">
+                // let a_week="<tr><td>1</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>";
+                // matsudate=matsu[inputmonth];
+                // console.log(matsudate,inputmonth);
+                // calender.insertAdjacentHTML("afterbegin",a_week);//第1週目を表記
+                // let cell=0;//カレンダー内の１セル
+                //         if(daystart!=0){//日曜始まりじゃない時
+                //             num=num-daystart;
+                //             for(let j=0;j<daystart;j++){
+                //                 let td=calender.getElementsByTagName("td")[cell];
+                //                 let changetd=td.innerHTML;
+                //                 td.innerHTML="&nbsp;";
+                //                 num++;
+                //                 cell++;
+                //             }
+                //         }
+                
+            // document.write(tbl);
+            // //うるう年の条件
+            // //1. 400で割りきれる年はうるう年
+            // //2. 4で割り切れて100で割りきれない年はうるう年
+            // //※1を優先する
+            // let year=2023;
+            // if(year%400==0||(year%4==0&&year%100!=0)){
+            //     document.write("<p>うるう年</p>");
+            // }
+            // else{
+            //     document.write("<p>うるう年ではない</p>");
+            // }
+            //3.西暦が100で割り切れて、400で割り切れない年」に該当する年は、うるう年にはならず平年
         </script>
     </body>
 </html>
